@@ -57,9 +57,9 @@ while True:
         # but I kept it simple for the demo
         name = None
         if match[0]:
-            name = "Pavan"
-        elif match[1]:
             name = "Roshan"
+        elif match[1]:
+            name = "Pavan"
 
         face_names.append(name)
 
