@@ -2,12 +2,13 @@ import face_recognition
 import cv2
 import os 
 
-filename1="1.jpg"
-filename2="2.jpg"
+# filename1="1.jpg"
+# filename2="2.jpg"
 current_id=0
 label_ids={}
 person_temp_encoded=[]
 
+#Label all the files in the Images folder
 base_dir=os.path.dirname(os.path.abspath(__file__))
 image_dir=os.path.join(base_dir,"Images")
 i=0
@@ -24,14 +25,14 @@ for root,dir,files in os.walk(image_dir):
         person_temp_encoded.append(face_recognition.face_encodings(person_temp)[0])
         
 
-print(label_ids)
+#Swap Key and Value in the Dictionary
+labels=dict((v,k) for k,v in label_ids.items())
+print(labels)
 
-
-person_one=face_recognition.load_image_file(filename1)
-person_one_encoded=face_recognition.face_encodings(person_one)[0]
-
-person_two=face_recognition.load_image_file(filename2)
-person_two_encoded=face_recognition.face_encodings(person_two)[0]
+# person_one=face_recognition.load_image_file(filename1)
+# person_one_encoded=face_recognition.face_encodings(person_one)[0]
+# person_two=face_recognition.load_image_file(filename2)
+# person_two_encoded=face_recognition.face_encodings(person_two)[0]
 
 known_faces=[
     person_temp_encoded  
@@ -56,14 +57,11 @@ while True:
     for face_encoding in face_encodings:
         match=face_recognition.compare_faces(person_temp_encoded,face_encoding,tolerance=0.5)
         name=None
-        if match[0]:
-            name=label_ids
-        elif match[1]:
-            print(match)
-            print(label_ids[1])
-         
-
-        
+        if match:
+            for i in match:
+                if match[i]:
+                    name=labels[i]
+     
         face_names.append(name)
 
     #draw the rectangle t=top r=right b=bottom l=left
