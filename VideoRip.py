@@ -1,46 +1,54 @@
 import face_recognition
 import cv2
-
-# This is a demo of running face recognition on a video file and saving the results to a new video file.
-
+import os
 
 # Open the input movie file
 input_video = cv2.VideoCapture("input.mp4")
 length = int(input_video.get(cv2.CAP_PROP_FRAME_COUNT))
 
-# Create an output movie file (make sure resolution/frame rate matches input video!)
+# Create an output movie file (resolution/frame rate must match the input video!)
 fourcc = cv2.VideoWriter_fourcc('M', 'P', 'E', 'G')
-
 output_video = cv2.VideoWriter('output.avi', fourcc, 25.07, (1280, 720))
 
-# Load some sample pictures and learn how to recognize them.
-female_image = face_recognition.load_image_file("1.jpg")
-female_face_encoding = face_recognition.face_encodings(female_image)[0]
+current_id=0
+label_ids={}
+person_temp_encoded=[]
 
-male_image = face_recognition.load_image_file("2.jpg")
-male_face_encoding = face_recognition.face_encodings(male_image)[0]
+#Collect and label all the files in the Images folder
+base_dir=os.path.dirname(os.path.abspath(__file__))
+image_dir=os.path.join(base_dir,"Images")
+i=0
+for root,dir,files in os.walk(image_dir):
+    for file in files:
+        person_temp=face_recognition.load_image_file(file)
+        path=os.path.join(root,file)
+        print(path)
+        label=os.path.basename(root).replace(" ","-").lower()
+        if not label in label_ids:
+            label_ids[label] = current_id
+            current_id += 1
+        id_ = label_ids[label]
+        person_temp_encoded.append(face_recognition.face_encodings(person_temp)[0])
+        
+#Swap Key and Value in the Dictionary
+labels=dict((v,k) for k,v in label_ids.items())
+print(labels)
 
-known_faces = [
-    female_face_encoding,
-    male_face_encoding
-]
-
-# Initialize some variables
 face_locations = []
 face_encodings = []
 face_names = []
 frame_number = 0
 
 while True:
-    # Grab a single frame of video
+    
     ret, frame = input_video.read()
     frame_number += 1
 
-    # Quit when the input video file ends
+    # If video file is out of frames => quit
     if not ret:
         break
 
-    # Convert the image from BGR color (which OpenCV uses) to RGB color (which face_recognition uses)
+    # Convert the image from BGR to RGB 
     rgb_frame = frame[:, :, ::-1]
 
     # Find all the faces and face encodings in the current frame of video
@@ -48,18 +56,18 @@ while True:
     face_encodings = face_recognition.face_encodings(rgb_frame, face_locations)
 
     face_names = []
+
     for face_encoding in face_encodings:
         # See if the face is a match for the known face(s)
         match = face_recognition.compare_faces(
-            known_faces, face_encoding, tolerance=0.50)
+            person_temp_encoded, face_encoding, tolerance=0.50)
 
-        # If you had more than 2 faces, you could make this logic a lot prettier
-        # but I kept it simple for the demo
+       #Search the match array at every frame for a True value and then index it with the labels array for the person's name
         name = None
-        if match[0]:
-            name = "Roshan"
-        elif match[1]:
-            name = "Pavan"
+        if match:
+            for index in range(len(match)):
+                if match[i]:
+                    name=labels[i]
 
         face_names.append(name)
 
@@ -68,20 +76,20 @@ while True:
         if not name:
             continue
 
-        # Draw a box around the face
+        # Drawing the rectangle
         cv2.rectangle(frame, (left, top), (right, bottom), (0, 0, 255), 2)
 
-        # Draw a label with a name below the face
+        # Drawing the label
         cv2.rectangle(frame, (left, bottom - 25),
                       (right, bottom), (0, 0, 255), cv2.FILLED)
         font = cv2.FONT_HERSHEY_DUPLEX
         cv2.putText(frame, name, (left + 6, bottom - 6),
                     font, 0.5, (255, 255, 255), 1)
 
-    # Write the resulting image to the output video file
+    # Write to utput video file frame by frame
     print("Writing frame {} / {}".format(frame_number, length))
     output_video.write(frame)
 
-# All done!
+#Release the webcam
 input_video.release()
 cv2.destroyAllWindows()
