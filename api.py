@@ -101,10 +101,7 @@ class VideoRip(Resource):
             # Write to utput video file frame by frame
             print("Writing frame {} / {}".format(frame_number, length))
             output_video.write(frame)
-
-        #Release the webcam
-        input_video.release()
-        cv2.destroyAllWindows()
+   
         return "Done"
 
 class VideoStream(Resource):
