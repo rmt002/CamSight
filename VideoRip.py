@@ -33,66 +33,66 @@ for root, dir, files in os.walk(image_dir):
         person_temp_encoded.append(
             face_recognition.face_encodings(person_temp)[0])
 
-# #Swap Key and Value in the Dictionary
-# labels=dict((v,k) for k,v in label_ids.items())
-# print(labels)
+# Swap Key and Value in the Dictionary
+labels = dict((v, k) for k, v in label_ids.items())
+print(labels)
 
-# face_locations = []
-# face_encodings = []
-# face_names = []
-# frame_number = 0
+face_locations = []
+face_encodings = []
+face_names = []
+frame_number = 0
 
-# while True:
+while True:
 
-#     ret, frame = input_video.read()
-#     frame_number += 1
+    ret, frame = input_video.read()
+    frame_number += 1
 
-#     # If video file is out of frames => quit
-#     if not ret:
-#         break
+    # If video file is out of frames => quit
+    if not ret:
+        break
 
-#     # Convert the image from BGR to RGB
-#     rgb_frame = frame[:, :, ::-1]
+    # Convert the image from BGR to RGB
+    rgb_frame = frame[:, :, ::-1]
 
-#     # Find all the faces and face encodings in the current frame of video
-#     face_locations = face_recognition.face_locations(rgb_frame)
-#     face_encodings = face_recognition.face_encodings(rgb_frame, face_locations)
+    # Find all the faces and face encodings in the current frame of video
+    face_locations = face_recognition.face_locations(rgb_frame)
+    face_encodings = face_recognition.face_encodings(rgb_frame, face_locations)
 
-#     face_names = []
+    face_names = []
 
-#     for face_encoding in face_encodings:
-#         # See if the face is a match for the known face(s)
-#         match = face_recognition.compare_faces(
-#             person_temp_encoded, face_encoding, tolerance=0.50)
+    for face_encoding in face_encodings:
+        # See if the face is a match for the known face(s)
+        match = face_recognition.compare_faces(
+            person_temp_encoded, face_encoding, tolerance=0.50)
 
-#        #Search the match array at every frame for a True value and then index it with the labels array for the person's name
-#         name = None
-#         if match:
-#             for index in range(len(match)):
-#                 if match[i]:
-#                     name=labels[i]
+       # Search the match array at every frame for a True value and then index it with the labels array for the person's name
+        name = None
+        if match:
+            for index in range(len(match)):
+                if match[index]:
+                    name = labels[index]
 
-#         face_names.append(name)
+        face_names.append(name)
 
-#     # Label the results
-#     for (top, right, bottom, left), name in zip(face_locations, face_names):
-#         if not name:
-#             continue
+    # Label the results
+    for (top, right, bottom, left), name in zip(face_locations, face_names):
+        if not name:
+            continue
 
-#         # Drawing the rectangle
-#         cv2.rectangle(frame, (left, top), (right, bottom), (0, 0, 255), 2)
+        # Drawing the rectangle
+        cv2.rectangle(frame, (left, top), (right, bottom), (0, 0, 255), 2)
 
-#         # Drawing the label
-#         cv2.rectangle(frame, (left, bottom - 25),
-#                       (right, bottom), (0, 0, 255), cv2.FILLED)
-#         font = cv2.FONT_HERSHEY_DUPLEX
-#         cv2.putText(frame, name, (left + 6, bottom - 6),
-#                     font, 0.5, (255, 255, 255), 1)
+        # Drawing the label
+        cv2.rectangle(frame, (left, bottom - 25),
+                      (right, bottom), (0, 0, 255), cv2.FILLED)
+        font = cv2.FONT_HERSHEY_DUPLEX
+        cv2.putText(frame, name, (left + 6, bottom - 6),
+                    font, 0.5, (255, 255, 255), 1)
 
-#     # Write to utput video file frame by frame
-#     print("Writing frame {} / {}".format(frame_number, length))
-#     output_video.write(frame)
+    # Write to utput video file frame by frame
+    print("Writing frame {} / {}".format(frame_number, length))
+    output_video.write(frame)
 
-# #Release the webcam
-# input_video.release()
-# cv2.destroyAllWindows()
+# Release the webcam
+input_video.release()
+cv2.destroyAllWindows()
