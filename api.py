@@ -1,13 +1,19 @@
 from flask import Flask, request
 from flask_restful import Resource, Api
+from flask_cors import CORS, cross_origin
 import face_recognition
 import cv2
 import os
 import PIL
+import base64
+from PIL import Image
+from werkzeug.utils import secure_filename
 
 
 app = Flask(__name__)
+cors = CORS(app)
 api = Api(app)
+app.config['CORS_HEADERS'] = 'Content-Type'
 
 class VideoRip(Resource):
     def get(self):
@@ -186,8 +192,34 @@ class VideoStream(Resource):
         cv2.destroyAllWindows()
 
 
+class uploadFile(Resource):
+    def post(self, folderName):
+        
+        fileData=request.json
+        data=fileData.get('_imageAsDataUrl')
+        data=data.split(',')[1]
+        #print(data)
+        if not os.path.exists('D:\\employee-tracker\\CamSight\\Images\\' + folderName):
+            os.makedirs('D:\\employee-tracker\\CamSight\\Images\\' + folderName)
+              
+        base_dir = os.path.dirname(os.path.abspath(__file__))
+        image_dir = os.path.join(base_dir, "Images",folderName)
+        completeName = os.path.join(image_dir, "1.png") 
+        completeNewName=os.path.join(image_dir,"2.jpg") 
+        with open(completeName, "wb") as fh:  
+            fh.write(base64.b64decode(data))
+        im = Image.open(completeName)
+        rgb_im = im.convert('RGB')
+        rgb_im.save(completeNewName) 
+        os.remove(completeName)
+
+        return "success"
+
+
+
 api.add_resource(VideoRip, '/videoRip')
 api.add_resource(VideoStream,'/videoStream')
+api.add_resource(uploadFile, '/upload/<folderName>')
 
 if __name__ == '__main__':
      app.run()
