@@ -16,8 +16,9 @@ api = Api(app)
 app.config['CORS_HEADERS'] = 'Content-Type'
 
 class VideoRip(Resource):
-    def get(self):
+    def get(self,param):
         # Open the input movie file
+        print(param)
         input_video = cv2.VideoCapture("input.mp4")
         length = int(input_video.get(cv2.CAP_PROP_FRAME_COUNT))
 
@@ -86,7 +87,8 @@ class VideoRip(Resource):
                     for index in range(len(match)):
                         if match[index]:
                             name=labels[index]
-
+                            if name == param:
+                                cv2.imwrite('Frame.jpg',frame)
                 face_names.append(name)
 
             # Label the results
@@ -107,7 +109,7 @@ class VideoRip(Resource):
             # Write to utput video file frame by frame
             print("Writing frame {} / {}".format(frame_number, length))
             output_video.write(frame)
-   
+
         return "Done"
 
 class VideoStream(Resource):
@@ -194,6 +196,7 @@ class VideoStream(Resource):
 
 class uploadFile(Resource):
     def post(self, folderName):
+        folderName=folderName.replace(" ", "-").lower()
         
         fileData=request.json
         data=fileData.get('_imageAsDataUrl')
@@ -217,7 +220,7 @@ class uploadFile(Resource):
 
 
 
-api.add_resource(VideoRip, '/videoRip')
+api.add_resource(VideoRip, '/videoRip/<param>')
 api.add_resource(VideoStream,'/videoStream')
 api.add_resource(uploadFile, '/upload/<folderName>')
 
